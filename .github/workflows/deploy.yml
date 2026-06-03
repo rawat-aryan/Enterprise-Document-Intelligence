@@ -1,0 +1,70 @@
+name: Deploy to Cloud Run
+
+on:
+  push:
+    branches: [main]
+
+env:
+  PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
+  REGION: us-central1
+  BACKEND_SERVICE: enterprise-doc-intel-backend
+  FRONTEND_SERVICE: enterprise-doc-intel-frontend
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - id: auth
+        uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker
+        run: gcloud auth configure-docker ${{ env.REGION }}-docker.pkg.dev
+
+      - name: Build and push backend
+        run: |
+          docker build -f docker/Dockerfile.backend \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/backend:${{ github.sha }} .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/backend:${{ github.sha }}
+
+      - name: Deploy backend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.BACKEND_SERVICE }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/backend:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --set-secrets="SECRET_KEY=enterprise-secret-key:latest,GEMINI_API_KEY=gemini-api-key:latest" \
+            --set-env-vars="ENVIRONMENT=production,GOOGLE_PROJECT_ID=${{ env.PROJECT_ID }}" \
+            --memory 2Gi \
+            --cpu 2 \
+            --concurrency 80 \
+            --min-instances 1 \
+            --max-instances 10
+
+      - name: Build and push frontend
+        run: |
+          docker build -f docker/Dockerfile.frontend \
+            -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/frontend:${{ github.sha }} .
+          docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/frontend:${{ github.sha }}
+
+      - name: Deploy frontend to Cloud Run
+        run: |
+          gcloud run deploy ${{ env.FRONTEND_SERVICE }} \
+            --image ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/enterprise/frontend:${{ github.sha }} \
+            --region ${{ env.REGION }} \
+            --platform managed \
+            --allow-unauthenticated \
+            --memory 1Gi \
+            --min-instances 1 \
+            --max-instances 5

@@ -1,0 +1,18 @@
+[
+  {"name": "invoice_id", "type": "STRING", "mode": "REQUIRED", "description": "Unique invoice identifier"},
+  {"name": "vendor_name", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "invoice_number", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "invoice_date", "type": "DATE", "mode": "NULLABLE"},
+  {"name": "due_date", "type": "DATE", "mode": "NULLABLE"},
+  {"name": "total_amount", "type": "FLOAT64", "mode": "NULLABLE"},
+  {"name": "tax_amount", "type": "FLOAT64", "mode": "NULLABLE"},
+  {"name": "subtotal", "type": "FLOAT64", "mode": "NULLABLE"},
+  {"name": "currency", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "validation_status", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "is_duplicate", "type": "BOOL", "mode": "NULLABLE"},
+  {"name": "duplicate_score", "type": "FLOAT64", "mode": "NULLABLE"},
+  {"name": "confidence_score", "type": "FLOAT64", "mode": "NULLABLE"},
+  {"name": "tenant_id", "type": "STRING", "mode": "NULLABLE"},
+  {"name": "created_at", "type": "TIMESTAMP", "mode": "NULLABLE"},
+  {"name": "processed_at", "type": "TIMESTAMP", "mode": "NULLABLE"}
+]
