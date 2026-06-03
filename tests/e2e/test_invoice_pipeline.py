@@ -6,17 +6,22 @@ import pytest
 @pytest.mark.asyncio
 async def test_full_invoice_pipeline(client, test_db):
     """End-to-end: register → upload text invoice → verify extraction."""
-    from httpx import AsyncClient
 
-    await client.post("/api/v1/auth/register", json={
-        "email": "e2e@example.com",
-        "password": "e2epassword",
-        "full_name": "E2E User",
-    })
-    login = await client.post("/api/v1/auth/login", json={
-        "email": "e2e@example.com",
-        "password": "e2epassword",
-    })
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "e2e@example.com",
+            "password": "e2epassword",
+            "full_name": "E2E User",
+        },
+    )
+    login = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "e2e@example.com",
+            "password": "e2epassword",
+        },
+    )
     token = login.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 

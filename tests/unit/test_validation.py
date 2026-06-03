@@ -1,15 +1,17 @@
 """Unit tests for validation service."""
+
 from __future__ import annotations
 
 from datetime import date
-import pytest
+
+from backend.app.models.invoice import ValidationStatus
 from backend.app.services.validation_service import ValidationService
-from backend.app.models.invoice import Invoice, ValidationStatus
 
 
 def _make_invoice(**kwargs):
     """Create a simple namespace object that behaves like an Invoice for validation."""
     from types import SimpleNamespace
+
     defaults = {
         "id": "test-id",
         "document_id": "doc-id",

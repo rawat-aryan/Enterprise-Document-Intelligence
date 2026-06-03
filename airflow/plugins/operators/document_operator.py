@@ -1,4 +1,5 @@
 """Custom Airflow operator for document processing tasks."""
+
 from __future__ import annotations
 
 from typing import Any
@@ -41,9 +42,9 @@ class DocumentProcessingOperator(BaseOperator):
         logger.info(f"Processing document {self.document_id} from {self.gcs_path}")
 
         try:
-            from backend.app.services.storage_service import storage_service
-            from backend.app.services.ocr_service import ocr_service
             from backend.app.services.gemini_service import gemini_service
+            from backend.app.services.ocr_service import ocr_service
+            from backend.app.services.storage_service import storage_service
 
             async def process():
                 # Download from GCS
@@ -100,6 +101,7 @@ class BigQuerySyncOperator(BaseOperator):
 
         try:
             from backend.app.services.bigquery_service import bigquery_service
+
             logger.info(f"BigQuery sync completed for {self.table_name}")
             return {"table": self.table_name, "status": "synced"}
         except Exception as e:

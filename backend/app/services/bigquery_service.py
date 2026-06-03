@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Any, Optional
+from typing import Any
 
 from backend.app.config import settings
 
@@ -16,6 +16,7 @@ class BigQueryService:
         if self._client is None:
             try:
                 from google.cloud import bigquery
+
                 self._client = bigquery.Client(project=settings.GOOGLE_PROJECT_ID)
             except Exception as e:
                 logger.warning(f"BigQuery client unavailable: {e}")

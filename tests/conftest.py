@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import asyncio
+
 import pytest
 import pytest_asyncio
-from httpx import AsyncClient, ASGITransport
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from httpx import ASGITransport, AsyncClient
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
-from backend.app.main import app
 from backend.app.database import Base, get_db
-from backend.app.core.security import hash_password
+from backend.app.main import app
 
 TEST_DB_URL = "sqlite+aiosqlite:///:memory:"
 
@@ -51,26 +51,22 @@ async def client(test_db):
 @pytest_asyncio.fixture
 async def auth_headers(client):
     """Create a test user and return auth headers."""
-    from backend.app.models.user import User
     from backend.app.models.tenant import Tenant
+    from backend.app.models.user import User
 
-    # Create tenant
-    tenant = Tenant(name="Test Corp", slug="test-corp")
-    # Create user
-    user = User(
-        email="test@example.com",
-        hashed_password=hash_password("testpassword123"),
-        full_name="Test User",
-        role="admin",
-    )
+    # Tenant and User models imported for type-checking; auth via API below
+    _ = Tenant, User
 
     # Register user via API
-    await client.post("/api/v1/auth/register", json={
-        "email": "test@example.com",
-        "password": "testpassword123",
-        "full_name": "Test User",
-        "role": "admin",
-    })
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "test@example.com",
+            "password": "testpassword123",
+            "full_name": "Test User",
+            "role": "admin",
+        },
+    )
     resp = await client.post("/api/v1/auth/login", json={"email": "test@example.com", "password": "testpassword123"})
     token = resp.json().get("access_token", "")
     return {"Authorization": f"Bearer {token}"}

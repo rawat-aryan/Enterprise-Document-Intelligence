@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from typing import Any, Callable
+from typing import Any
 
 from backend.app.config import settings
 
@@ -17,6 +17,7 @@ class PubSubService:
         if self._publisher is None:
             try:
                 from google.cloud import pubsub_v1
+
                 self._publisher = pubsub_v1.PublisherClient()
             except Exception as e:
                 logger.warning(f"Pub/Sub unavailable: {e}")
@@ -37,11 +38,13 @@ class PubSubService:
             return False
 
     def publish_document_event(self, document_id: str, event_type: str, metadata: dict | None = None) -> bool:
-        return self.publish({
-            "document_id": document_id,
-            "event_type": event_type,
-            "metadata": metadata or {},
-        })
+        return self.publish(
+            {
+                "document_id": document_id,
+                "event_type": event_type,
+                "metadata": metadata or {},
+            }
+        )
 
 
 pubsub_service = PubSubService()

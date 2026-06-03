@@ -33,7 +33,7 @@ async def list_invoices(
     if validation_status:
         query = query.where(Invoice.validation_status == validation_status)
     if duplicates_only:
-        query = query.where(Invoice.is_duplicate == True)
+        query = query.where(Invoice.is_duplicate.is_(True))
 
     count_q = select(func.count()).select_from(query.subquery())
     total = (await db.execute(count_q)).scalar() or 0
@@ -72,6 +72,7 @@ async def get_invoice_stats(
             currency_breakdown[inv.currency] = currency_breakdown.get(inv.currency, 0.0) + inv.total_amount
 
     from collections import defaultdict
+
     monthly: dict = defaultdict(float)
     for inv in invoices:
         if inv.invoice_date:
@@ -97,7 +98,7 @@ async def get_duplicates(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    query = select(Invoice).where(Invoice.is_duplicate == True)
+    query = select(Invoice).where(Invoice.is_duplicate.is_(True))
     if current_user.tenant_id:
         query = query.where(Invoice.tenant_id == current_user.tenant_id)
 

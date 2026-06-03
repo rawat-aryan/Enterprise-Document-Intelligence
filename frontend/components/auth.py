@@ -1,7 +1,9 @@
 """Authentication components for Streamlit frontend."""
-import streamlit as st
-import httpx
+
 import os
+
+import httpx
+import streamlit as st
 
 API_BASE = os.environ.get("API_BASE_URL", "http://localhost:8000/api/v1")
 

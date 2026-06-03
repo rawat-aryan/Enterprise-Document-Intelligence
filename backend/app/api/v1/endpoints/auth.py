@@ -4,10 +4,8 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from backend.app.core.security import (
-    create_access_token, get_current_user, hash_password, verify_password
-)
 from backend.app.config import settings
+from backend.app.core.security import create_access_token, get_current_user, hash_password, verify_password
 from backend.app.database import get_db
 from backend.app.models.user import User
 from backend.app.schemas.auth import LoginRequest, RegisterRequest, TokenResponse, UserResponse

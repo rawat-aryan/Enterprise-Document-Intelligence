@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-import streamlit as st
 import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="Invoice Processing", layout="wide")
 
@@ -12,6 +12,7 @@ if not st.session_state.get("authenticated"):
 st.title("🧾 Invoice Processing")
 
 import httpx
+
 headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
 col1, col2, col3 = st.columns(3)
@@ -35,8 +36,17 @@ try:
 
         if data["items"]:
             df = pd.DataFrame(data["items"])
-            display_cols = ["invoice_number", "vendor_name", "invoice_date", "total_amount", "currency",
-                           "tax_amount", "validation_status", "is_duplicate", "confidence_score"]
+            display_cols = [
+                "invoice_number",
+                "vendor_name",
+                "invoice_date",
+                "total_amount",
+                "currency",
+                "tax_amount",
+                "validation_status",
+                "is_duplicate",
+                "confidence_score",
+            ]
             df_display = df[[c for c in display_cols if c in df.columns]]
 
             # Color duplicates

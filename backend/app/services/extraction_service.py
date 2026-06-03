@@ -4,16 +4,15 @@ import logging
 from datetime import datetime, timezone
 from typing import Optional
 
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from backend.app.models.contract import Contract
 from backend.app.models.document import Document, DocumentStatus, DocumentType
 from backend.app.models.invoice import Invoice
-from backend.app.models.contract import Contract
-from backend.app.services.ocr_service import ocr_service
-from backend.app.services.gemini_service import gemini_service
-from backend.app.services.validation_service import validation_service
 from backend.app.services.duplicate_detection_service import duplicate_detection_service
+from backend.app.services.gemini_service import gemini_service
+from backend.app.services.ocr_service import ocr_service
 
 logger = logging.getLogger(__name__)
 
@@ -21,7 +20,7 @@ logger = logging.getLogger(__name__)
 def _safe_date(date_str: Optional[str]):
     if not date_str:
         return None
-    from datetime import date
+
     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%m/%d/%Y", "%d %b %Y", "%d %B %Y"):
         try:
             return datetime.strptime(date_str, fmt).date()

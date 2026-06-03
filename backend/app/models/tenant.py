@@ -5,12 +5,12 @@ from typing import TYPE_CHECKING, Optional
 from sqlalchemy import JSON, Boolean, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.base import TimestampMixin, UUIDMixin
 from backend.app.database import Base
+from backend.app.models.base import TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from backend.app.models.user import User
     from backend.app.models.document import Document
+    from backend.app.models.user import User
 
 
 class Tenant(UUIDMixin, TimestampMixin, Base):

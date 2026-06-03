@@ -28,8 +28,10 @@ if query:
     with st.chat_message("assistant"):
         with st.spinner("Searching documents..."):
             try:
-                from backend.app.services.rag_service import rag_service
                 import asyncio
+
+                from backend.app.services.rag_service import rag_service
+
                 result = asyncio.run(rag_service.query(query))
                 answer = result.get("answer", "No answer found.")
                 sources = result.get("sources", [])

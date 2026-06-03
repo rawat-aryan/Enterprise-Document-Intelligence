@@ -11,6 +11,7 @@ if not st.session_state.get("authenticated"):
 st.title("📋 Report Generation")
 
 import httpx
+
 headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
 st.subheader("Invoice Excel Report")

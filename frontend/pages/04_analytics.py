@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import streamlit as st
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+import streamlit as st
 
 st.set_page_config(page_title="Analytics", layout="wide")
 
@@ -27,6 +27,7 @@ question = st.text_input("Or type your question", value=selected or "")
 
 if st.button("Run Query", type="primary") and question:
     import httpx
+
     headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
     with st.spinner("Generating SQL and running query..."):
@@ -60,8 +61,12 @@ if st.button("Run Query", type="primary") and question:
                     numeric_cols = df.select_dtypes(include="number").columns.tolist()
                     string_cols = df.select_dtypes(include="object").columns.tolist()
                     if numeric_cols and string_cols:
-                        fig = px.bar(df.head(20), x=string_cols[0], y=numeric_cols[0],
-                                    title=f"{string_cols[0]} vs {numeric_cols[0]}")
+                        fig = px.bar(
+                            df.head(20),
+                            x=string_cols[0],
+                            y=numeric_cols[0],
+                            title=f"{string_cols[0]} vs {numeric_cols[0]}",
+                        )
                         st.plotly_chart(fig, use_container_width=True)
                 else:
                     st.info("Query returned no results")

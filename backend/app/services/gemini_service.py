@@ -2,11 +2,11 @@
 # All logic has moved to ai_service.py which supports both Claude and Gemini.
 from backend.app.services.ai_service import (
     AIService,
-    InvoiceExtraction,
     ContractExtraction,
+    InvoiceExtraction,
+    LineItemExtraction,
     ReportExtraction,
     ValidationResult,
-    LineItemExtraction,
     gemini_service,
 )
 

@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 import io
+
 import openpyxl
-import pytest
+
 from backend.app.services.excel_service import ExcelService
 
 

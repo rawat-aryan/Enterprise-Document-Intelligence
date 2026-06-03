@@ -4,9 +4,8 @@ import time
 from contextlib import asynccontextmanager
 
 import structlog
-from fastapi import FastAPI, Request, status
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
 from prometheus_client import Counter, Histogram, make_asgi_app
 
 from backend.app.config import settings
@@ -78,4 +77,5 @@ async def root():
 
 # Import and register routers
 from backend.app.api.v1.router import api_router  # noqa: E402
+
 app.include_router(api_router, prefix="/api/v1")

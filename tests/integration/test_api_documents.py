@@ -13,20 +13,26 @@ async def test_health_check(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_register_and_login(client: AsyncClient):
-    reg_resp = await client.post("/api/v1/auth/register", json={
-        "email": "newuser@example.com",
-        "password": "securepassword",
-        "full_name": "New User",
-        "role": "analyst",
-    })
+    reg_resp = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "newuser@example.com",
+            "password": "securepassword",
+            "full_name": "New User",
+            "role": "analyst",
+        },
+    )
     assert reg_resp.status_code == 201
     user = reg_resp.json()
     assert user["email"] == "newuser@example.com"
 
-    login_resp = await client.post("/api/v1/auth/login", json={
-        "email": "newuser@example.com",
-        "password": "securepassword",
-    })
+    login_resp = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "newuser@example.com",
+            "password": "securepassword",
+        },
+    )
     assert login_resp.status_code == 200
     assert "access_token" in login_resp.json()
 
@@ -39,15 +45,21 @@ async def test_upload_document_unauthenticated(client: AsyncClient):
 
 @pytest.mark.asyncio
 async def test_list_documents_empty(client: AsyncClient):
-    reg = await client.post("/api/v1/auth/register", json={
-        "email": "doc_user@example.com",
-        "password": "password123",
-        "full_name": "Doc User",
-    })
-    login = await client.post("/api/v1/auth/login", json={
-        "email": "doc_user@example.com",
-        "password": "password123",
-    })
+    _ = await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "doc_user@example.com",
+            "password": "password123",
+            "full_name": "Doc User",
+        },
+    )
+    login = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "doc_user@example.com",
+            "password": "password123",
+        },
+    )
     token = login.json()["access_token"]
     headers = {"Authorization": f"Bearer {token}"}
 

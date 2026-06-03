@@ -3,11 +3,11 @@ from __future__ import annotations
 from datetime import date
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Date, Float, ForeignKey, JSON, String, Text
+from sqlalchemy import JSON, Date, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.base import TimestampMixin, UUIDMixin
 from backend.app.database import Base
+from backend.app.models.base import TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from backend.app.models.document import Document

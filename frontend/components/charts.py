@@ -1,8 +1,10 @@
 """Reusable Plotly chart components."""
+
 from typing import Any
-import plotly.graph_objects as go
-import plotly.express as px
+
 import pandas as pd
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 def monthly_spend_chart(monthly_data: list[dict]) -> go.Figure:
@@ -41,15 +43,17 @@ def vendor_distribution_chart(vendor_data: list[dict]) -> go.Figure:
     labels = [v.get("vendor_name", v.get("vendor", "Unknown")) for v in vendor_data[:10]]
     values = [v.get("total_amount", v.get("total_spend", 0)) for v in vendor_data[:10]]
 
-    fig = go.Figure(data=[
-        go.Pie(
-            labels=labels,
-            values=values,
-            hole=0.4,
-            textposition="inside",
-            textinfo="percent+label",
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Pie(
+                labels=labels,
+                values=values,
+                hole=0.4,
+                textposition="inside",
+                textinfo="percent+label",
+            )
+        ]
+    )
     fig.update_layout(
         title="Vendor Spend Distribution (Top 10)",
         showlegend=True,
@@ -69,15 +73,17 @@ def invoice_status_chart(validation_breakdown: dict) -> go.Figure:
         "pending": "#95A5A6",
     }
 
-    fig = go.Figure(data=[
-        go.Bar(
-            x=statuses,
-            y=counts,
-            marker_color=[colors.get(s, "#3498DB") for s in statuses],
-            text=counts,
-            textposition="auto",
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Bar(
+                x=statuses,
+                y=counts,
+                marker_color=[colors.get(s, "#3498DB") for s in statuses],
+                text=counts,
+                textposition="auto",
+            )
+        ]
+    )
     fig.update_layout(
         title="Invoice Validation Status",
         xaxis_title="Status",
@@ -91,27 +97,29 @@ def risk_gauge_chart(risk_score: float, title: str = "Risk Score") -> go.Figure:
     """Gauge chart for risk score display."""
     color = "#2ECC71" if risk_score < 0.3 else ("#F39C12" if risk_score < 0.7 else "#E74C3C")
 
-    fig = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
-        value=risk_score * 100,
-        domain={"x": [0, 1], "y": [0, 1]},
-        title={"text": title},
-        delta={"reference": 50},
-        gauge={
-            "axis": {"range": [None, 100]},
-            "bar": {"color": color},
-            "steps": [
-                {"range": [0, 30], "color": "#D5F5E3"},
-                {"range": [30, 70], "color": "#FDEBD0"},
-                {"range": [70, 100], "color": "#FADBD8"},
-            ],
-            "threshold": {
-                "line": {"color": "red", "width": 4},
-                "thickness": 0.75,
-                "value": 70,
+    fig = go.Figure(
+        go.Indicator(
+            mode="gauge+number+delta",
+            value=risk_score * 100,
+            domain={"x": [0, 1], "y": [0, 1]},
+            title={"text": title},
+            delta={"reference": 50},
+            gauge={
+                "axis": {"range": [None, 100]},
+                "bar": {"color": color},
+                "steps": [
+                    {"range": [0, 30], "color": "#D5F5E3"},
+                    {"range": [30, 70], "color": "#FDEBD0"},
+                    {"range": [70, 100], "color": "#FADBD8"},
+                ],
+                "threshold": {
+                    "line": {"color": "red", "width": 4},
+                    "thickness": 0.75,
+                    "value": 70,
+                },
             },
-        },
-    ))
+        )
+    )
     fig.update_layout(height=300)
     return fig
 
@@ -124,6 +132,7 @@ def contract_health_chart(contracts: list[dict]) -> go.Figure:
         return fig
 
     from datetime import date
+
     today = date.today()
     names, risk_scores, days_to_expiry, values = [], [], [], []
 
@@ -133,6 +142,7 @@ def contract_health_chart(contracts: list[dict]) -> go.Figure:
         exp = c.get("expiration_date")
         if exp:
             from datetime import datetime
+
             if isinstance(exp, str):
                 try:
                     exp = datetime.fromisoformat(exp).date()
@@ -141,22 +151,24 @@ def contract_health_chart(contracts: list[dict]) -> go.Figure:
         days_to_expiry.append((exp - today).days if exp else 365)
         values.append(c.get("contract_value") or 10000)
 
-    fig = go.Figure(data=[
-        go.Scatter(
-            x=days_to_expiry,
-            y=risk_scores,
-            mode="markers+text",
-            text=names,
-            textposition="top center",
-            marker=dict(
-                size=[max(10, min(v / 10000, 50)) for v in values],
-                color=risk_scores,
-                colorscale="RdYlGn_r",
-                showscale=True,
-                colorbar=dict(title="Risk Score"),
-            ),
-        )
-    ])
+    fig = go.Figure(
+        data=[
+            go.Scatter(
+                x=days_to_expiry,
+                y=risk_scores,
+                mode="markers+text",
+                text=names,
+                textposition="top center",
+                marker=dict(
+                    size=[max(10, min(v / 10000, 50)) for v in values],
+                    color=risk_scores,
+                    colorscale="RdYlGn_r",
+                    showscale=True,
+                    colorbar=dict(title="Risk Score"),
+                ),
+            )
+        ]
+    )
     fig.update_layout(
         title="Contract Health Matrix",
         xaxis_title="Days to Expiry",
@@ -177,12 +189,14 @@ def processing_metrics_chart(metrics: dict) -> go.Figure:
         metrics.get("failed", 0),
     ]
 
-    fig = go.Figure(go.Funnel(
-        y=stages,
-        x=values,
-        textinfo="value+percent initial",
-        marker_color=["#3498DB", "#2E75B6", "#1F4E79", "#2ECC71", "#E74C3C"],
-    ))
+    fig = go.Figure(
+        go.Funnel(
+            y=stages,
+            x=values,
+            textinfo="value+percent initial",
+            marker_color=["#3498DB", "#2E75B6", "#1F4E79", "#2ECC71", "#E74C3C"],
+        )
+    )
     fig.update_layout(title="Document Processing Pipeline")
     return fig
 
@@ -206,9 +220,7 @@ def duplicate_analysis_chart(total: int, duplicate: int) -> go.Figure:
     values = [max(total - duplicate, 0), duplicate]
     colors = ["#2ECC71", "#E74C3C"]
 
-    fig = go.Figure(data=[
-        go.Pie(labels=labels, values=values, hole=0.5, marker_colors=colors)
-    ])
+    fig = go.Figure(data=[go.Pie(labels=labels, values=values, hole=0.5, marker_colors=colors)])
     fig.update_layout(
         title="Invoice Uniqueness Analysis",
         annotations=[dict(text=f"{duplicate}<br>Dups", x=0.5, y=0.5, font_size=14, showarrow=False)],

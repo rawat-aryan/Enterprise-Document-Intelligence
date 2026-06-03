@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-import streamlit as st
+import pandas as pd
 import plotly.express as px
 import plotly.graph_objects as go
-import pandas as pd
+import streamlit as st
 
 st.set_page_config(page_title="Dashboard", layout="wide")
 
@@ -27,7 +27,11 @@ try:
         col1, col2, col3, col4 = st.columns(4)
         col1.metric("Total Invoices", stats["total_invoices"])
         col2.metric("Total Spend", f"₹{stats['total_amount']:,.0f}")
-        col3.metric("Duplicates Found", stats["duplicate_count"], delta=f"-₹{stats['average_amount'] * stats['duplicate_count']:,.0f} risk")
+        col3.metric(
+            "Duplicates Found",
+            stats["duplicate_count"],
+            delta=f"-₹{stats['average_amount'] * stats['duplicate_count']:,.0f} risk",
+        )
         col4.metric("Avg Invoice Value", f"₹{stats['average_amount']:,.0f}")
 
         st.divider()
@@ -47,7 +51,12 @@ try:
                 names=list(vb.keys()),
                 values=list(vb.values()),
                 title="Validation Status Distribution",
-                color_discrete_map={"valid": "#22c55e", "invalid": "#ef4444", "pending": "#f59e0b", "needs_review": "#3b82f6"},
+                color_discrete_map={
+                    "valid": "#22c55e",
+                    "invalid": "#ef4444",
+                    "pending": "#f59e0b",
+                    "needs_review": "#3b82f6",
+                },
             )
             fig_val.update_layout(height=350)
             col_right.plotly_chart(fig_val, use_container_width=True)
@@ -57,8 +66,11 @@ try:
         if spend.get("vendors"):
             df_vendors = pd.DataFrame(spend["vendors"])
             fig_vendors = px.bar(
-                df_vendors.head(10), x="vendor", y="total_spend",
-                title="Top 10 Vendors by Spend", color="total_spend",
+                df_vendors.head(10),
+                x="vendor",
+                y="total_spend",
+                title="Top 10 Vendors by Spend",
+                color="total_spend",
                 color_continuous_scale="Blues",
             )
             fig_vendors.update_layout(yaxis_tickprefix="₹", height=400, xaxis_tickangle=-45)

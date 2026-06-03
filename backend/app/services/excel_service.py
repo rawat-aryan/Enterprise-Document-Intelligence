@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import io
 import logging
-from datetime import datetime
 from typing import Any
 
 logger = logging.getLogger(__name__)
@@ -26,12 +25,6 @@ class ExcelService:
         """Generate a 5-sheet Excel workbook with full styling."""
         try:
             from openpyxl import Workbook
-            from openpyxl.styles import (
-                Alignment, Border, Font, GradientFill, PatternFill, Side
-            )
-            from openpyxl.utils import get_column_letter
-            from openpyxl.chart import BarChart, PieChart, Reference
-            from openpyxl.chart.series import DataPoint
 
             wb = Workbook()
             wb.remove(wb.active)  # Remove default sheet
@@ -53,17 +46,17 @@ class ExcelService:
 
     def _apply_header_style(self, ws, row_num: int, col_count: int, text: str, fill_color: str):
         from openpyxl.styles import Alignment, Font, PatternFill
+
         cell = ws.cell(row=row_num, column=1, value=text)
         cell.font = Font(bold=True, color="FFFFFF", size=14)
         cell.fill = PatternFill(start_color=fill_color, end_color=fill_color, fill_type="solid")
         cell.alignment = Alignment(horizontal="center", vertical="center")
         if col_count > 1:
-            ws.merge_cells(
-                start_row=row_num, start_column=1, end_row=row_num, end_column=col_count
-            )
+            ws.merge_cells(start_row=row_num, start_column=1, end_row=row_num, end_column=col_count)
 
     def _apply_column_header(self, ws, row_num: int, headers: list[str]):
         from openpyxl.styles import Alignment, Font, PatternFill
+
         for col, header in enumerate(headers, 1):
             cell = ws.cell(row=row_num, column=col, value=header)
             cell.font = Font(bold=True, color="FFFFFF", size=11)
@@ -76,6 +69,7 @@ class ExcelService:
 
     def _auto_width(self, ws):
         from openpyxl.utils import get_column_letter
+
         for col in ws.columns:
             max_len = 0
             col_letter = get_column_letter(col[0].column)
@@ -85,14 +79,24 @@ class ExcelService:
             ws.column_dimensions[col_letter].width = min(max(max_len + 2, 10), 40)
 
     def _create_summary_sheet(self, wb, invoices: list[dict]):
-        from openpyxl.styles import Alignment, Font, PatternFill, Border, Side
+        from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
+
         ws = wb.create_sheet("Invoice Summary")
         ws.freeze_panes = "A3"
 
         headers = [
-            "Invoice #", "Vendor Name", "Invoice Date", "Due Date",
-            "Subtotal", "Tax Amount", "Total Amount", "Currency",
-            "GST Number", "Status", "Confidence", "Duplicate"
+            "Invoice #",
+            "Vendor Name",
+            "Invoice Date",
+            "Due Date",
+            "Subtotal",
+            "Tax Amount",
+            "Total Amount",
+            "Currency",
+            "GST Number",
+            "Status",
+            "Confidence",
+            "Duplicate",
         ]
         self._apply_header_style(ws, 1, len(headers), "Invoice Summary Report", self.HEADER_FILL)
         self._apply_column_header(ws, 2, headers)
@@ -143,16 +147,13 @@ class ExcelService:
         self._auto_width(ws)
 
     def _create_vendor_sheet(self, wb, vendor_data: list[dict]):
-        from openpyxl.styles import Font, PatternFill, Alignment
         from openpyxl.chart import BarChart, Reference
+        from openpyxl.styles import PatternFill
 
         ws = wb.create_sheet("Vendor Analytics")
         ws.freeze_panes = "A3"
 
-        headers = [
-            "Vendor Name", "Invoice Count", "Total Amount",
-            "Average Amount", "Duplicate Rate (%)", "Risk Score"
-        ]
+        headers = ["Vendor Name", "Invoice Count", "Total Amount", "Average Amount", "Duplicate Rate (%)", "Risk Score"]
         self._apply_header_style(ws, 1, len(headers), "Vendor Analytics", self.HEADER_FILL)
         self._apply_column_header(ws, 2, headers)
 
@@ -186,17 +187,23 @@ class ExcelService:
             chart.add_data(data, titles_from_data=True)
             chart.set_categories(cats)
             chart.shape = 4
-            ws.add_chart(chart, f"H3")
+            ws.add_chart(chart, "H3")
 
         self._auto_width(ws)
 
     def _create_duplicate_sheet(self, wb, duplicates: list[dict]):
         from openpyxl.styles import Font, PatternFill
+
         ws = wb.create_sheet("Duplicate Detection")
 
         headers = [
-            "Invoice #", "Vendor Name", "Invoice Date", "Total Amount",
-            "Duplicate Score", "Duplicate Of", "Action Required"
+            "Invoice #",
+            "Vendor Name",
+            "Invoice Date",
+            "Total Amount",
+            "Duplicate Score",
+            "Duplicate Of",
+            "Action Required",
         ]
         self._apply_header_style(ws, 1, len(headers), "Duplicate Invoice Detection", "C0392B")
         self._apply_column_header(ws, 2, headers)
@@ -230,7 +237,6 @@ class ExcelService:
 
     def _create_tax_sheet(self, wb, invoices: list[dict]):
         from openpyxl.styles import Font, PatternFill
-        from openpyxl.chart import PieChart, Reference
 
         ws = wb.create_sheet("Tax Analysis")
         ws.freeze_panes = "A3"
@@ -283,11 +289,10 @@ class ExcelService:
 
     def _create_exceptions_sheet(self, wb, invoices: list[dict]):
         from openpyxl.styles import Font, PatternFill
+
         ws = wb.create_sheet("Exceptions")
 
-        headers = [
-            "Invoice #", "Vendor", "Amount", "Status", "Issue Type", "Details", "Recommended Action"
-        ]
+        headers = ["Invoice #", "Vendor", "Amount", "Status", "Issue Type", "Details", "Recommended Action"]
         self._apply_header_style(ws, 1, len(headers), "Processing Exceptions & Alerts", "922B21")
         self._apply_column_header(ws, 2, headers)
 
@@ -296,25 +301,29 @@ class ExcelService:
             errors = inv.get("validation_errors") or []
             for err in errors:
                 issue_type = "WARNING" if err.startswith("WARNING") else "ERROR"
-                exceptions.append({
-                    "invoice_number": inv.get("invoice_number", ""),
-                    "vendor_name": inv.get("vendor_name", ""),
-                    "total_amount": inv.get("total_amount"),
-                    "status": inv.get("validation_status", ""),
-                    "issue_type": issue_type,
-                    "detail": err,
-                    "action": "Review and correct" if issue_type == "ERROR" else "Verify amount",
-                })
+                exceptions.append(
+                    {
+                        "invoice_number": inv.get("invoice_number", ""),
+                        "vendor_name": inv.get("vendor_name", ""),
+                        "total_amount": inv.get("total_amount"),
+                        "status": inv.get("validation_status", ""),
+                        "issue_type": issue_type,
+                        "detail": err,
+                        "action": "Review and correct" if issue_type == "ERROR" else "Verify amount",
+                    }
+                )
             if inv.get("is_duplicate"):
-                exceptions.append({
-                    "invoice_number": inv.get("invoice_number", ""),
-                    "vendor_name": inv.get("vendor_name", ""),
-                    "total_amount": inv.get("total_amount"),
-                    "status": "DUPLICATE",
-                    "issue_type": "DUPLICATE",
-                    "detail": f"Possible duplicate of invoice {inv.get('duplicate_of', 'unknown')}",
-                    "action": "Block payment pending investigation",
-                })
+                exceptions.append(
+                    {
+                        "invoice_number": inv.get("invoice_number", ""),
+                        "vendor_name": inv.get("vendor_name", ""),
+                        "total_amount": inv.get("total_amount"),
+                        "status": "DUPLICATE",
+                        "issue_type": "DUPLICATE",
+                        "detail": f"Possible duplicate of invoice {inv.get('duplicate_of', 'unknown')}",
+                        "action": "Block payment pending investigation",
+                    }
+                )
 
         for row_idx, exc in enumerate(exceptions, 3):
             issue = exc["issue_type"]
@@ -345,11 +354,14 @@ class ExcelService:
 
     def _compute_vendor_analytics(self, invoices: list[dict]) -> list[dict]:
         from collections import defaultdict
-        vendors: dict[str, dict] = defaultdict(lambda: {
-            "invoice_count": 0,
-            "total_amount": 0.0,
-            "duplicate_count": 0,
-        })
+
+        vendors: dict[str, dict] = defaultdict(
+            lambda: {
+                "invoice_count": 0,
+                "total_amount": 0.0,
+                "duplicate_count": 0,
+            }
+        )
         for inv in invoices:
             name = inv.get("vendor_name") or "Unknown"
             vendors[name]["invoice_count"] += 1
@@ -360,14 +372,16 @@ class ExcelService:
         result = []
         for name, data in vendors.items():
             count = data["invoice_count"]
-            result.append({
-                "vendor_name": name,
-                "invoice_count": count,
-                "total_amount": data["total_amount"],
-                "average_amount": data["total_amount"] / count if count > 0 else 0,
-                "duplicate_rate": data["duplicate_count"] / count if count > 0 else 0,
-                "risk_score": min(data["duplicate_count"] / max(count, 1) + 0.1, 1.0),
-            })
+            result.append(
+                {
+                    "vendor_name": name,
+                    "invoice_count": count,
+                    "total_amount": data["total_amount"],
+                    "average_amount": data["total_amount"] / count if count > 0 else 0,
+                    "duplicate_rate": data["duplicate_count"] / count if count > 0 else 0,
+                    "risk_score": min(data["duplicate_count"] / max(count, 1) + 0.1, 1.0),
+                }
+            )
         return sorted(result, key=lambda x: x["total_amount"], reverse=True)
 
 

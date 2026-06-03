@@ -3,10 +3,7 @@ from __future__ import annotations
 import asyncio
 import io
 import logging
-import os
-import tempfile
 from pathlib import Path
-from typing import Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +22,7 @@ class OCRService:
     def _check_tesseract(self) -> bool:
         try:
             import pytesseract
+
             pytesseract.get_tesseract_version()
             return True
         except Exception:
@@ -74,8 +72,8 @@ class OCRService:
         # Fallback to OCR via pdf2image + tesseract
         if self._tesseract_available:
             try:
-                from pdf2image import convert_from_bytes
                 import pytesseract
+                from pdf2image import convert_from_bytes
 
                 images = convert_from_bytes(pdf_bytes, dpi=300)
                 page_count = len(images)
@@ -84,10 +82,7 @@ class OCRService:
 
                 for img in images:
                     data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
-                    words = [
-                        w for w, c in zip(data["text"], data["conf"])
-                        if w.strip() and int(c) > 0
-                    ]
+                    words = [w for w, c in zip(data["text"], data["conf"]) if w.strip() and int(c) > 0]
                     confs = [int(c) for c in data["conf"] if int(c) > 0]
                     ocr_texts.append(" ".join(words))
                     if confs:
@@ -110,15 +105,12 @@ class OCRService:
             return OCRResult(text="", confidence=0.0)
 
         try:
-            from PIL import Image
             import pytesseract
+            from PIL import Image
 
             img = Image.open(io.BytesIO(image_bytes))
             data = pytesseract.image_to_data(img, output_type=pytesseract.Output.DICT)
-            words = [
-                w for w, c in zip(data["text"], data["conf"])
-                if w.strip() and int(c) > 0
-            ]
+            words = [w for w, c in zip(data["text"], data["conf"]) if w.strip() and int(c) > 0]
             confs = [int(c) for c in data["conf"] if int(c) > 0]
             text = " ".join(words)
             avg_conf = sum(confs) / len(confs) / 100 if confs else 0.5

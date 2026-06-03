@@ -1,4 +1,5 @@
 """Sidebar navigation component."""
+
 import streamlit as st
 
 

@@ -3,6 +3,7 @@ AI service — uses Claude (Anthropic) when CLAUDE_API_KEY is set,
 falls back to Gemini when GEMINI_API_KEY is set,
 falls back to regex-based extraction when neither is available.
 """
+
 from __future__ import annotations
 
 import json
@@ -19,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 # ── Pydantic extraction models (shared by both backends) ─────────────────────
+
 
 class LineItemExtraction(BaseModel):
     description: str = ""
@@ -158,7 +160,8 @@ VALIDATION_PROMPT = """Validate the following extracted document data. Return ON
 Data:
 {data}
 
-Check for: missing required fields, invalid dates, math errors (subtotal+tax≠total), invalid GST format, negative/zero amounts.
+Check for: missing required fields, invalid dates, math errors
+(subtotal+tax not equal total), invalid GST format, negative/zero amounts.
 
 Return JSON:
 {{
@@ -187,6 +190,7 @@ Data:
 
 
 # ── Helper ────────────────────────────────────────────────────────────────────
+
 
 def _parse_json(text: str) -> dict:
     text = text.strip()
@@ -222,6 +226,7 @@ def _regex_invoice(text: str) -> InvoiceExtraction:
 
 # ── Claude backend ────────────────────────────────────────────────────────────
 
+
 class ClaudeBackend:
     def __init__(self) -> None:
         self._client = None
@@ -230,6 +235,7 @@ class ClaudeBackend:
         if self._client is None:
             try:
                 import anthropic
+
                 self._client = anthropic.Anthropic(api_key=settings.CLAUDE_API_KEY)
             except Exception as e:
                 logger.error(f"Failed to init Anthropic client: {e}")
@@ -289,6 +295,7 @@ class ClaudeBackend:
 
 # ── Gemini backend ────────────────────────────────────────────────────────────
 
+
 class GeminiBackend:
     def __init__(self) -> None:
         self._model = None
@@ -297,6 +304,7 @@ class GeminiBackend:
         if self._model is None:
             try:
                 import google.generativeai as genai
+
                 genai.configure(api_key=settings.GEMINI_API_KEY)
                 self._model = genai.GenerativeModel(settings.GEMINI_MODEL)
             except Exception as e:
@@ -353,6 +361,7 @@ class GeminiBackend:
 
 # ── Unified AIService facade ──────────────────────────────────────────────────
 
+
 class AIService:
     """
     Selects the active backend at startup:
@@ -378,30 +387,35 @@ class AIService:
         if self._backend is None:
             return _regex_invoice(text)
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._backend.extract_invoice, text)
 
     async def extract_contract_data(self, text: str) -> ContractExtraction:
         if self._backend is None:
             return ContractExtraction(summary=text[:300])
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._backend.extract_contract, text)
 
     async def generate_sql(self, question: str, schema: str) -> str:
         if self._backend is None:
             return "SELECT * FROM invoices LIMIT 10"
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._backend.generate_sql, question, schema)
 
     async def generate_insights(self, data: dict) -> str:
         if self._backend is None:
             return "Configure CLAUDE_API_KEY or GEMINI_API_KEY to enable AI insights."
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._backend.generate_insights, data)
 
     async def validate_extraction(self, data: dict) -> ValidationResult:
         if self._backend is None:
             return ValidationResult(is_valid=True, confidence=0.5)
         import asyncio
+
         return await asyncio.get_event_loop().run_in_executor(None, self._backend.validate_extraction, data)
 
     # Legacy alias so existing code calling gemini_service.* still works

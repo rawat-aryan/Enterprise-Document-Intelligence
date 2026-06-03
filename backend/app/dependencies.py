@@ -1,8 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional
-
-from fastapi import Depends, HTTPException, Query, status
+from fastapi import Depends, HTTPException, status
 
 from backend.app.core.security import get_current_user
 from backend.app.models.user import User, UserRole
@@ -16,6 +14,7 @@ def require_role(*roles: str):
                 detail=f"Role '{current_user.role}' does not have access. Required: {list(roles)}",
             )
         return current_user
+
     return role_checker
 
 

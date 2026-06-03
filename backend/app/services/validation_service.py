@@ -6,10 +6,7 @@ from typing import Any, Optional
 
 from backend.app.models.invoice import Invoice, ValidationStatus
 
-
-VALID_GST_PATTERN = re.compile(
-    r"^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]{1}$"
-)
+VALID_GST_PATTERN = re.compile(r"^\d{2}[A-Z]{5}\d{4}[A-Z]{1}[A-Z\d]{1}Z[A-Z\d]{1}$")
 VALID_PAN_PATTERN = re.compile(r"^[A-Z]{5}\d{4}[A-Z]{1}$")
 
 
@@ -80,11 +77,7 @@ class ValidationService:
 
         # Line items check
         if invoice.line_items:
-            line_total = sum(
-                item.get("amount", 0) or 0
-                for item in invoice.line_items
-                if isinstance(item, dict)
-            )
+            line_total = sum(item.get("amount", 0) or 0 for item in invoice.line_items if isinstance(item, dict))
             if invoice.subtotal is not None and line_total > 0:
                 if abs(line_total - invoice.subtotal) > 1.0:
                     report.add_warning(

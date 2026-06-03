@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import time
-from typing import Optional
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import text
@@ -17,7 +16,9 @@ router = APIRouter()
 
 SCHEMA_CONTEXT = """
 Tables:
-- invoices(id, vendor_name, invoice_number, invoice_date, due_date, total_amount, tax_amount, currency, validation_status, is_duplicate, tenant_id, created_at)
+- invoices(id, vendor_name, invoice_number, invoice_date, due_date,
+  total_amount, tax_amount, currency, validation_status, is_duplicate,
+  tenant_id, created_at)
 - documents(id, filename, doc_type, status, confidence_score, tenant_id, created_at)
 - contracts(id, contract_type, effective_date, expiration_date, contract_value, risk_score, tenant_id, created_at)
 """
@@ -61,7 +62,8 @@ async def get_spend_analytics(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    from sqlalchemy import select, func
+    from sqlalchemy import func, select
+
     from backend.app.models.invoice import Invoice
 
     q = select(
@@ -76,8 +78,12 @@ async def get_spend_analytics(
 
     result = await db.execute(q)
     vendors = [
-        {"vendor": r.vendor_name, "invoice_count": r.invoice_count,
-         "total_spend": float(r.total_spend or 0), "avg_amount": float(r.avg_amount or 0)}
+        {
+            "vendor": r.vendor_name,
+            "invoice_count": r.invoice_count,
+            "total_spend": float(r.total_spend or 0),
+            "avg_amount": float(r.avg_amount or 0),
+        }
         for r in result.all()
     ]
     return {"vendors": vendors, "period": period}

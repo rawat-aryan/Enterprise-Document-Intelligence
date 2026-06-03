@@ -1,13 +1,13 @@
 from __future__ import annotations
 
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from backend.app.core.security import get_current_user
 from backend.app.database import get_db
-from backend.app.models.invoice import Invoice
 from backend.app.models.contract import Contract
+from backend.app.models.invoice import Invoice
 from backend.app.models.user import User
 from backend.app.services.gemini_service import gemini_service
 
@@ -75,6 +75,7 @@ async def contract_recommendations(
     current_user: User = Depends(get_current_user),
 ):
     from datetime import date, timedelta
+
     cutoff = date.today() + timedelta(days=60)
     q = select(Contract).where(Contract.expiration_date <= cutoff)
     if current_user.tenant_id:

@@ -4,17 +4,17 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import DateTime, Float, ForeignKey, JSON, String, Text
+from sqlalchemy import JSON, DateTime, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.base import TimestampMixin, UUIDMixin
 from backend.app.database import Base
+from backend.app.models.base import TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from backend.app.models.user import User
-    from backend.app.models.tenant import Tenant
-    from backend.app.models.invoice import Invoice
     from backend.app.models.contract import Contract
+    from backend.app.models.invoice import Invoice
+    from backend.app.models.tenant import Tenant
+    from backend.app.models.user import User
 
 
 class DocumentStatus(str, Enum):
@@ -44,9 +44,7 @@ class Document(UUIDMixin, TimestampMixin, Base):
     file_size: Mapped[Optional[int]] = mapped_column(nullable=True)
     mime_type: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
 
-    status: Mapped[str] = mapped_column(
-        String(50), default=DocumentStatus.UPLOADED.value, nullable=False, index=True
-    )
+    status: Mapped[str] = mapped_column(String(50), default=DocumentStatus.UPLOADED.value, nullable=False, index=True)
     raw_text: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     extracted_data: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     confidence_score: Mapped[Optional[float]] = mapped_column(Float, nullable=True)

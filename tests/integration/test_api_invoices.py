@@ -2,22 +2,24 @@ from __future__ import annotations
 
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from backend.app.models.document import Document, DocumentType, DocumentStatus
-from backend.app.models.invoice import Invoice, ValidationStatus
 
 
 async def create_test_user_and_token(client: AsyncClient) -> str:
-    await client.post("/api/v1/auth/register", json={
-        "email": "invoice_user@example.com",
-        "password": "password123",
-        "full_name": "Invoice User",
-    })
-    login = await client.post("/api/v1/auth/login", json={
-        "email": "invoice_user@example.com",
-        "password": "password123",
-    })
+    await client.post(
+        "/api/v1/auth/register",
+        json={
+            "email": "invoice_user@example.com",
+            "password": "password123",
+            "full_name": "Invoice User",
+        },
+    )
+    login = await client.post(
+        "/api/v1/auth/login",
+        json={
+            "email": "invoice_user@example.com",
+            "password": "password123",
+        },
+    )
     return login.json()["access_token"]
 
 

@@ -16,18 +16,22 @@ class StorageService:
         if self._client is None:
             try:
                 from google.cloud import storage
+
                 self._client = storage.Client(project=settings.GOOGLE_PROJECT_ID)
             except Exception as e:
                 logger.warning(f"GCS client unavailable: {e}")
         return self._client
 
-    async def upload_file(self, file_bytes: bytes, destination: str, content_type: str = "application/octet-stream") -> Optional[str]:
+    async def upload_file(
+        self, file_bytes: bytes, destination: str, content_type: str = "application/octet-stream"
+    ) -> Optional[str]:
         client = self._get_client()
         if not client:
             logger.info(f"GCS unavailable, skipping upload for {destination}")
             return None
         try:
             import asyncio
+
             loop = asyncio.get_event_loop()
             return await loop.run_in_executor(None, self._sync_upload, client, file_bytes, destination, content_type)
         except Exception as e:
@@ -46,6 +50,7 @@ class StorageService:
             return None
         try:
             import asyncio
+
             path = gcs_path.replace(f"gs://{settings.GCS_BUCKET_NAME}/", "")
             loop = asyncio.get_event_loop()
             return await loop.run_in_executor(None, self._sync_download, client, path)
@@ -64,6 +69,7 @@ class StorageService:
             return None
         try:
             from datetime import timedelta
+
             path = gcs_path.replace(f"gs://{settings.GCS_BUCKET_NAME}/", "")
             bucket = client.bucket(settings.GCS_BUCKET_NAME)
             blob = bucket.blob(path)

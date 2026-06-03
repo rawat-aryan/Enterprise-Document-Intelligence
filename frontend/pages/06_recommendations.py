@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-import streamlit as st
-import plotly.express as px
 import pandas as pd
+import plotly.express as px
+import streamlit as st
 
 st.set_page_config(page_title="Recommendations", layout="wide")
 
@@ -12,6 +12,7 @@ if not st.session_state.get("authenticated"):
 
 st.title("💡 AI Recommendations")
 import httpx
+
 headers = {"Authorization": f"Bearer {st.session_state.token}"}
 
 tab1, tab2, tab3 = st.tabs(["Vendor Performance", "Cost Optimization", "Contract Alerts"])
@@ -26,9 +27,16 @@ with tab1:
                     st.info(data["insights"])
                 if data.get("vendors"):
                     df = pd.DataFrame(data["vendors"])
-                    fig = px.scatter(df, x="total_invoices", y="total_spend", size="avg_amount",
-                                   hover_name="vendor", title="Vendor Risk vs Spend",
-                                   color="duplicate_rate", color_continuous_scale="RdYlGn_r")
+                    fig = px.scatter(
+                        df,
+                        x="total_invoices",
+                        y="total_spend",
+                        size="avg_amount",
+                        hover_name="vendor",
+                        title="Vendor Risk vs Spend",
+                        color="duplicate_rate",
+                        color_continuous_scale="RdYlGn_r",
+                    )
                     st.plotly_chart(fig, use_container_width=True)
                     st.dataframe(df, use_container_width=True)
         except Exception as e:
@@ -37,7 +45,9 @@ with tab1:
 with tab2:
     with st.spinner("Computing cost optimization opportunities..."):
         try:
-            resp = httpx.get(f"{st.session_state.api_base}/recommendations/cost-optimization", headers=headers, timeout=20)
+            resp = httpx.get(
+                f"{st.session_state.api_base}/recommendations/cost-optimization", headers=headers, timeout=20
+            )
             if resp.status_code == 200:
                 data = resp.json()
                 col1, col2, col3 = st.columns(3)

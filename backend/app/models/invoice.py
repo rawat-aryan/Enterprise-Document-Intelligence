@@ -4,11 +4,11 @@ from datetime import date
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
-from sqlalchemy import Boolean, Date, Float, ForeignKey, JSON, String, Text
+from sqlalchemy import JSON, Boolean, Date, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.base import TimestampMixin, UUIDMixin
 from backend.app.database import Base
+from backend.app.models.base import TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
     from backend.app.models.document import Document

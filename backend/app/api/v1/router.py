@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from backend.app.api.v1.endpoints import auth, documents, invoices, contracts, analytics, reports, recommendations
+from backend.app.api.v1.endpoints import analytics, auth, contracts, documents, invoices, recommendations, reports
 
 api_router = APIRouter()
 

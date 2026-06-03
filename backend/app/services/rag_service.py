@@ -86,8 +86,7 @@ class RAGService:
 
             ids = [f"{document_id}_chunk_{i}" for i in range(len(chunks))]
             chunk_metadata = [
-                {**(metadata or {}), "document_id": document_id, "chunk_index": i}
-                for i in range(len(chunks))
+                {**(metadata or {}), "document_id": document_id, "chunk_index": i} for i in range(len(chunks))
             ]
 
             if embeddings_fn:
@@ -163,8 +162,9 @@ class RAGService:
                 genai.configure(api_key=settings.GEMINI_API_KEY)
 
             model = genai.GenerativeModel(settings.GEMINI_MODEL)
-            prompt = f"""You are an enterprise document assistant. Answer the question based ONLY on the provided context.
-If the answer cannot be found in the context, say "I don't have enough information to answer this question."
+            prompt = f"""You are an enterprise document assistant.
+Answer the question based ONLY on the provided context.
+If the answer is not in the context, say "I don't have enough information."
 
 Context:
 {context[:3000]}
@@ -179,7 +179,11 @@ Answer:"""
             # Fall back to extractive answer
             lines = context.split("\n")
             question_words = set(question.lower().split())
-            best_line = max(lines, key=lambda l: len(set(l.lower().split()) & question_words), default="")
+            best_line = max(
+                lines,
+                key=lambda ln: len(set(ln.lower().split()) & question_words),
+                default="",
+            )
             return best_line.strip() or "Unable to generate answer."
 
     async def get_relevant_chunks(self, query: str, n_results: int = 3) -> list[str]:

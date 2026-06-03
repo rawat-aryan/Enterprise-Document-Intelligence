@@ -1,10 +1,13 @@
 from __future__ import annotations
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
+import pytest
+
 from backend.app.services.duplicate_detection_service import (
-    DuplicateDetectionService, _normalize_string, _string_similarity
+    DuplicateDetectionService,
+    _normalize_string,
+    _string_similarity,
 )
 
 
@@ -32,7 +35,9 @@ def test_string_similarity_empty():
 async def test_check_duplicate_no_existing():
     service = DuplicateDetectionService()
     mock_db = AsyncMock()
-    mock_db.execute = AsyncMock(return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[])))))
+    mock_db.execute = AsyncMock(
+        return_value=MagicMock(scalars=MagicMock(return_value=MagicMock(all=MagicMock(return_value=[]))))
+    )
 
     mock_invoice = MagicMock()
     mock_invoice.invoice_number = "INV-999"

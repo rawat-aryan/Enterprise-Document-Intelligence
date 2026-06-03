@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
 
 from sqlalchemy import Boolean, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from backend.app.models.base import TimestampMixin, UUIDMixin
 from backend.app.database import Base
+from backend.app.models.base import TimestampMixin, UUIDMixin
 
 if TYPE_CHECKING:
-    from backend.app.models.tenant import Tenant
     from backend.app.models.document import Document
+    from backend.app.models.tenant import Tenant
 
 
 class UserRole(str, Enum):

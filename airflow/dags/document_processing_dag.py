@@ -2,8 +2,9 @@ from __future__ import annotations
 
 from datetime import datetime, timedelta
 
-from airflow import DAG
 from airflow.operators.python import PythonOperator
+
+from airflow import DAG
 
 default_args = {
     "owner": "platform",
@@ -16,20 +17,26 @@ default_args = {
 
 def scan_pending_documents(**context):
     """Find documents with status=uploaded in the database."""
-    import os, sys
+    import os
+    import sys
+
     sys.path.insert(0, "/app")
     import asyncio
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
     from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
     async def _scan():
         db_url = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./dev.db")
         engine = create_async_engine(db_url)
         async_session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
         from backend.app.models.document import Document, DocumentStatus
+
         async with async_session() as session:
             result = await session.execute(
-                select(Document.id, Document.filename).where(Document.status == DocumentStatus.UPLOADED.value).limit(100)
+                select(Document.id, Document.filename)
+                .where(Document.status == DocumentStatus.UPLOADED.value)
+                .limit(100)
             )
             docs = [{"id": str(r.id), "filename": r.filename} for r in result.all()]
         await engine.dispose()
@@ -62,11 +69,14 @@ def process_documents(**context):
 
 def sync_to_bigquery(**context):
     """Sync processed documents to BigQuery."""
-    import os, sys
+    import os
+    import sys
+
     sys.path.insert(0, "/app")
     import asyncio
-    from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+
     from sqlalchemy import select
+    from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 
     async def _sync():
         db_url = os.environ.get("DATABASE_URL", "sqlite+aiosqlite:///./dev.db")
@@ -79,13 +89,19 @@ def sync_to_bigquery(**context):
             result = await session.execute(select(Invoice).limit(500))
             invoices = result.scalars().all()
             for inv in invoices:
-                bigquery_service.sync_invoice({
-                    "id": inv.id, "vendor_name": inv.vendor_name,
-                    "invoice_number": inv.invoice_number, "total_amount": inv.total_amount,
-                    "currency": inv.currency, "is_duplicate": inv.is_duplicate,
-                    "validation_status": inv.validation_status, "tenant_id": inv.tenant_id,
-                    "invoice_date": str(inv.invoice_date) if inv.invoice_date else None,
-                })
+                bigquery_service.sync_invoice(
+                    {
+                        "id": inv.id,
+                        "vendor_name": inv.vendor_name,
+                        "invoice_number": inv.invoice_number,
+                        "total_amount": inv.total_amount,
+                        "currency": inv.currency,
+                        "is_duplicate": inv.is_duplicate,
+                        "validation_status": inv.validation_status,
+                        "tenant_id": inv.tenant_id,
+                        "invoice_date": str(inv.invoice_date) if inv.invoice_date else None,
+                    }
+                )
         await engine.dispose()
         return len(invoices)
 

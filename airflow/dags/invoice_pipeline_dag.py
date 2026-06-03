@@ -2,14 +2,16 @@
 Airflow DAG: Bulk Invoice Processing Pipeline
 Processes batches of invoices from database, runs duplicate detection, validates, and notifies.
 """
+
 from __future__ import annotations
 
 from datetime import timedelta
 
-from airflow import DAG
-from airflow.operators.python import PythonOperator
 from airflow.operators.dummy import DummyOperator
+from airflow.operators.python import PythonOperator
 from airflow.utils.dates import days_ago
+
+from airflow import DAG
 
 default_args = {
     "owner": "accounts-payable",
@@ -24,13 +26,17 @@ default_args = {
 
 def fetch_pending_invoices(**context) -> list[str]:
     """Fetch invoice IDs pending duplicate detection."""
-    import sys, asyncio, logging
+    import asyncio
+    import logging
+    import sys
+
     sys.path.insert(0, "/app")
     logger = logging.getLogger(__name__)
 
     try:
-        from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
         from sqlalchemy import select
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
         from backend.app.config import settings
         from backend.app.models.invoice import Invoice, ValidationStatus
 
@@ -39,9 +45,7 @@ def fetch_pending_invoices(**context) -> list[str]:
             Session = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
             async with Session() as session:
                 result = await session.execute(
-                    select(Invoice.id).where(
-                        Invoice.validation_status == ValidationStatus.PENDING.value
-                    ).limit(500)
+                    select(Invoice.id).where(Invoice.validation_status == ValidationStatus.PENDING.value).limit(500)
                 )
                 ids = [row[0] for row in result.all()]
             await engine.dispose()
@@ -58,7 +62,10 @@ def fetch_pending_invoices(**context) -> list[str]:
 
 def run_duplicate_detection(**context) -> dict:
     """Run duplicate detection on pending invoices."""
-    import sys, asyncio, logging
+    import asyncio
+    import logging
+    import sys
+
     sys.path.insert(0, "/app")
     logger = logging.getLogger(__name__)
 
@@ -67,8 +74,9 @@ def run_duplicate_detection(**context) -> dict:
         return {"processed": 0, "duplicates": 0}
 
     try:
-        from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
         from sqlalchemy import select
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
         from backend.app.config import settings
         from backend.app.models.invoice import Invoice
         from backend.app.services.duplicate_detection_service import duplicate_detection_service
@@ -106,7 +114,10 @@ def run_duplicate_detection(**context) -> dict:
 
 def run_validation(**context) -> dict:
     """Run validation on processed invoices."""
-    import sys, asyncio, logging
+    import asyncio
+    import logging
+    import sys
+
     sys.path.insert(0, "/app")
     logger = logging.getLogger(__name__)
 
@@ -115,8 +126,9 @@ def run_validation(**context) -> dict:
         return {"validated": 0, "invalid": 0}
 
     try:
-        from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
         from sqlalchemy import select
+        from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
         from backend.app.config import settings
         from backend.app.models.invoice import Invoice
         from backend.app.services.validation_service import validation_service
@@ -154,6 +166,7 @@ def run_validation(**context) -> dict:
 def send_processing_summary(**context):
     """Log processing summary (in prod would send email/Slack)."""
     import logging
+
     logger = logging.getLogger(__name__)
 
     dup_result = context["task_instance"].xcom_pull(key="dup_result", task_ids="duplicate_detection")

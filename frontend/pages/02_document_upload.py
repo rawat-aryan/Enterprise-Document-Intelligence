@@ -19,6 +19,7 @@ with tab1:
 
     if uploaded_file and st.button("Upload & Process", type="primary"):
         import httpx
+
         headers = {"Authorization": f"Bearer {st.session_state.token}"}
         with st.spinner("Uploading and processing..."):
             try:
@@ -41,11 +42,14 @@ with tab1:
 with tab2:
     st.subheader("Bulk Upload (ZIP File)")
     st.info("Upload a ZIP file containing multiple invoices/documents. All supported formats will be processed.")
-    zip_doc_type = st.selectbox("Document Type for all files", ["invoice", "contract", "report", "other"], key="bulk_type")
+    zip_doc_type = st.selectbox(
+        "Document Type for all files", ["invoice", "contract", "report", "other"], key="bulk_type"
+    )
     zip_file = st.file_uploader("Choose ZIP file", type=["zip"])
 
     if zip_file and st.button("Upload ZIP & Process All", type="primary"):
         import httpx
+
         headers = {"Authorization": f"Bearer {st.session_state.token}"}
         with st.spinner(f"Uploading {zip_file.name}..."):
             try:
@@ -59,7 +63,9 @@ with tab2:
                 if resp.status_code == 202:
                     data = resp.json()
                     st.success(f"{data['message']}")
-                    st.write(f"Document IDs: {data['document_ids'][:5]}{'...' if len(data['document_ids']) > 5 else ''}")
+                    st.write(
+                        f"Document IDs: {data['document_ids'][:5]}{'...' if len(data['document_ids']) > 5 else ''}"
+                    )
                 else:
                     st.error(f"Upload failed: {resp.text}")
             except Exception as e:

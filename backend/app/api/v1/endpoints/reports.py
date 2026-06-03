@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import io
-from fastapi import APIRouter, Depends, HTTPException
+
+from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -28,11 +29,15 @@ async def generate_excel_report(
 
     invoice_dicts = [
         {
-            "vendor_name": i.vendor_name, "invoice_number": i.invoice_number,
+            "vendor_name": i.vendor_name,
+            "invoice_number": i.invoice_number,
             "invoice_date": str(i.invoice_date) if i.invoice_date else None,
-            "total_amount": i.total_amount, "tax_amount": i.tax_amount,
-            "currency": i.currency, "validation_status": i.validation_status,
-            "is_duplicate": i.is_duplicate, "duplicate_score": i.duplicate_score,
+            "total_amount": i.total_amount,
+            "tax_amount": i.tax_amount,
+            "currency": i.currency,
+            "validation_status": i.validation_status,
+            "is_duplicate": i.is_duplicate,
+            "duplicate_score": i.duplicate_score,
             "confidence_score": i.confidence_score,
             "validation_errors": i.validation_errors or [],
         }
