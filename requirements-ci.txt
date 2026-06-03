@@ -24,3 +24,5 @@ alembic==1.13.3
 PyPDF2==3.0.1
 pdf2image==1.17.0
 pytesseract==0.3.13
+pydantic[email]==2.9.2
+email-validator==2.2.0
