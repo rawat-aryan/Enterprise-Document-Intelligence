@@ -21,20 +21,12 @@ langchain-google-genai==2.0.4
 langchain-community==0.3.7
 chromadb==0.5.20
 pytesseract==0.3.13
-<<<<<<< HEAD
 Pillow==10.4.0
-=======
-Pillow
->>>>>>> 9637818 (changes in the requirements so that there is not dependency conflict)
 pdf2image==1.17.0
 pypdf2==3.0.1
 openpyxl==3.1.5
 pandas==2.2.3
-<<<<<<< HEAD
 numpy==1.26.4
-=======
-numpy
->>>>>>> 9637818 (changes in the requirements so that there is not dependency conflict)
 plotly==5.24.1
 streamlit==1.39.0
 apache-airflow==2.10.3
