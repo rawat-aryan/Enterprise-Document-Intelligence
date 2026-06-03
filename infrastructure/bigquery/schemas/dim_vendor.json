@@ -1,0 +1,19 @@
+[
+  {"name": "vendor_id", "type": "STRING", "mode": "REQUIRED", "description": "Vendor dimension key (hash of name+gst)"},
+  {"name": "vendor_name", "type": "STRING", "mode": "REQUIRED", "description": "Vendor name"},
+  {"name": "gst_number", "type": "STRING", "mode": "NULLABLE", "description": "GST registration number"},
+  {"name": "pan_number", "type": "STRING", "mode": "NULLABLE", "description": "PAN number"},
+  {"name": "vendor_address", "type": "STRING", "mode": "NULLABLE", "description": "Registered address"},
+  {"name": "vendor_email", "type": "STRING", "mode": "NULLABLE", "description": "Contact email"},
+  {"name": "vendor_phone", "type": "STRING", "mode": "NULLABLE", "description": "Contact phone"},
+  {"name": "first_seen", "type": "DATE", "mode": "NULLABLE", "description": "Date of first invoice"},
+  {"name": "last_seen", "type": "DATE", "mode": "NULLABLE", "description": "Date of most recent invoice"},
+  {"name": "total_invoices", "type": "INT64", "mode": "NULLABLE", "description": "Total invoice count"},
+  {"name": "total_spend", "type": "FLOAT64", "mode": "NULLABLE", "description": "Cumulative spend amount"},
+  {"name": "duplicate_rate", "type": "FLOAT64", "mode": "NULLABLE", "description": "Percentage of duplicate invoices"},
+  {"name": "avg_invoice_amount", "type": "FLOAT64", "mode": "NULLABLE", "description": "Average invoice amount"},
+  {"name": "risk_score", "type": "FLOAT64", "mode": "NULLABLE", "description": "Vendor risk score 0-1"},
+  {"name": "is_preferred_vendor", "type": "BOOL", "mode": "NULLABLE", "description": "Preferred vendor flag"},
+  {"name": "tenant_id", "type": "STRING", "mode": "NULLABLE", "description": "Tenant identifier"},
+  {"name": "updated_at", "type": "TIMESTAMP", "mode": "NULLABLE", "description": "Last update timestamp"}
+]

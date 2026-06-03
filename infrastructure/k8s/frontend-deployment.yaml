@@ -1,0 +1,103 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-doc-intel-frontend
+  namespace: default
+  labels:
+    app: enterprise-doc-intel-frontend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: enterprise-doc-intel-frontend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: enterprise-doc-intel-frontend
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+      containers:
+        - name: frontend
+          image: gcr.io/PROJECT_ID/enterprise-doc-intel-frontend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8501
+              name: http
+          env:
+            - name: API_BASE_URL
+              value: "http://enterprise-doc-intel-backend-svc/api/v1"
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          livenessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 20
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /_stcore/health
+              port: 8501
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-doc-intel-frontend-svc
+  namespace: default
+spec:
+  selector:
+    app: enterprise-doc-intel-frontend
+  ports:
+    - port: 80
+      targetPort: 8501
+      protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: enterprise-doc-intel-ingress
+  namespace: default
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+spec:
+  tls:
+    - hosts:
+        - docintel.yourcompany.com
+      secretName: enterprise-doc-intel-tls
+  rules:
+    - host: docintel.yourcompany.com
+      http:
+        paths:
+          - path: /api
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-doc-intel-backend-svc
+                port:
+                  number: 80
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: enterprise-doc-intel-frontend-svc
+                port:
+                  number: 80

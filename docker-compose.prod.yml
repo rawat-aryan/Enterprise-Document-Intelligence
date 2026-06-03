@@ -1,0 +1,84 @@
+version: "3.9"
+
+# Production overrides - use with: docker compose -f docker-compose.yml -f docker-compose.prod.yml up
+
+services:
+  backend:
+    image: ${REGISTRY}/enterprise-doc-intel-backend:${IMAGE_TAG:-latest}
+    environment:
+      ENVIRONMENT: production
+      DEBUG: "false"
+      DATABASE_URL: ${DATABASE_URL}
+      SECRET_KEY: ${SECRET_KEY}
+      GEMINI_API_KEY: ${GEMINI_API_KEY}
+      GOOGLE_PROJECT_ID: ${GOOGLE_PROJECT_ID}
+      GCS_BUCKET_NAME: ${GCS_BUCKET_NAME}
+      PUBSUB_TOPIC: ${PUBSUB_TOPIC}
+      BIGQUERY_DATASET: ${BIGQUERY_DATASET}
+      REDIS_URL: ${REDIS_URL}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS}
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+        reservations:
+          cpus: "0.5"
+          memory: 1G
+      restart_policy:
+        condition: on-failure
+        max_attempts: 3
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health').raise_for_status()"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    command: >
+      uvicorn backend.app.main:app
+      --host 0.0.0.0
+      --port 8000
+      --workers 4
+      --worker-class uvicorn.workers.UvicornWorker
+      --access-log
+      --log-level info
+    volumes: []  # No volume mounts in production
+
+  frontend:
+    image: ${REGISTRY}/enterprise-doc-intel-frontend:${IMAGE_TAG:-latest}
+    environment:
+      API_BASE_URL: ${BACKEND_URL}/api/v1
+    deploy:
+      replicas: 2
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 1G
+
+  postgres:
+    # In production, use Cloud SQL or managed PostgreSQL instead
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 4G
+    volumes:
+      - postgres_prod_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass ${REDIS_PASSWORD} --maxmemory 512mb --maxmemory-policy allkeys-lru
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+
+volumes:
+  postgres_prod_data:
+    driver: local

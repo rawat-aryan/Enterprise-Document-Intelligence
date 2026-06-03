@@ -1,0 +1,177 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: enterprise-doc-intel-backend
+  namespace: default
+  labels:
+    app: enterprise-doc-intel-backend
+    version: "1.0.0"
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: enterprise-doc-intel-backend
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: enterprise-doc-intel-backend
+        version: "1.0.0"
+    spec:
+      serviceAccountName: enterprise-doc-intel-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      containers:
+        - name: backend
+          image: gcr.io/PROJECT_ID/enterprise-doc-intel-backend:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              name: http
+          env:
+            - name: ENVIRONMENT
+              value: "production"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-doc-intel-secrets
+                  key: database_url
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-doc-intel-secrets
+                  key: secret_key
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: enterprise-doc-intel-secrets
+                  key: gemini_api_key
+            - name: GOOGLE_PROJECT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: enterprise-doc-intel-config
+                  key: google_project_id
+            - name: GCS_BUCKET_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: enterprise-doc-intel-config
+                  key: gcs_bucket_name
+            - name: BIGQUERY_DATASET
+              valueFrom:
+                configMapKeyRef:
+                  name: enterprise-doc-intel-config
+                  key: bigquery_dataset
+            - name: REDIS_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: enterprise-doc-intel-config
+                  key: redis_url
+            - name: CHROMA_PERSIST_DIR
+              value: "/app/chroma_db"
+          volumeMounts:
+            - name: chroma-storage
+              mountPath: /app/chroma_db
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "1Gi"
+            limits:
+              cpu: "2000m"
+              memory: "4Gi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            failureThreshold: 30
+            periodSeconds: 10
+      volumes:
+        - name: chroma-storage
+          persistentVolumeClaim:
+            claimName: chroma-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: enterprise-doc-intel-backend-svc
+  namespace: default
+spec:
+  selector:
+    app: enterprise-doc-intel-backend
+  ports:
+    - port: 80
+      targetPort: 8000
+      protocol: TCP
+  type: ClusterIP
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: enterprise-doc-intel-backend-hpa
+  namespace: default
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: enterprise-doc-intel-backend
+  minReplicas: 2
+  maxReplicas: 10
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: enterprise-doc-intel-config
+  namespace: default
+data:
+  google_project_id: "your-gcp-project-id"
+  gcs_bucket_name: "your-gcp-project-id-enterprise-documents"
+  bigquery_dataset: "document_intelligence"
+  redis_url: "redis://redis-service:6379/0"
+  pubsub_topic: "document-processing"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: chroma-pvc
+  namespace: default
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+  storageClassName: standard

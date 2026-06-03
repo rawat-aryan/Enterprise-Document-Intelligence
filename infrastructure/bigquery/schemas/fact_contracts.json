@@ -1,0 +1,19 @@
+[
+  {"name": "contract_id", "type": "STRING", "mode": "REQUIRED", "description": "Primary key - UUID"},
+  {"name": "document_id", "type": "STRING", "mode": "NULLABLE", "description": "Source document reference"},
+  {"name": "tenant_id", "type": "STRING", "mode": "NULLABLE", "description": "Multi-tenant identifier"},
+  {"name": "contract_type", "type": "STRING", "mode": "NULLABLE", "description": "Type of contract"},
+  {"name": "contract_value", "type": "FLOAT64", "mode": "NULLABLE", "description": "Contract monetary value"},
+  {"name": "currency", "type": "STRING", "mode": "NULLABLE", "description": "Currency code"},
+  {"name": "effective_date", "type": "DATE", "mode": "NULLABLE", "description": "Contract start date"},
+  {"name": "expiration_date", "type": "DATE", "mode": "NULLABLE", "description": "Contract end date"},
+  {"name": "signed_date", "type": "DATE", "mode": "NULLABLE", "description": "Date contract was signed"},
+  {"name": "days_to_expiry", "type": "INT64", "mode": "NULLABLE", "description": "Days remaining until expiry"},
+  {"name": "risk_score", "type": "FLOAT64", "mode": "NULLABLE", "description": "AI-computed risk score 0-1"},
+  {"name": "risk_level", "type": "STRING", "mode": "NULLABLE", "description": "LOW/MEDIUM/HIGH"},
+  {"name": "parties_count", "type": "INT64", "mode": "NULLABLE", "description": "Number of contracting parties"},
+  {"name": "has_penalties", "type": "BOOL", "mode": "NULLABLE", "description": "Whether contract has penalty clauses"},
+  {"name": "has_renewal_clause", "type": "BOOL", "mode": "NULLABLE", "description": "Whether auto-renewal exists"},
+  {"name": "summary", "type": "STRING", "mode": "NULLABLE", "description": "AI-generated summary"},
+  {"name": "created_at", "type": "TIMESTAMP", "mode": "NULLABLE", "description": "Record creation timestamp"}
+]

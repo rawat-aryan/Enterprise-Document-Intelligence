@@ -64,12 +64,13 @@ async def auth_headers(client):
         role="admin",
     )
 
-    async for session in override_get_db := (lambda: test_db)():
-        session.add(tenant)
-        session.add(user)
-        await session.commit()
-        break
-
+    # Register user via API
+    await client.post("/api/v1/auth/register", json={
+        "email": "test@example.com",
+        "password": "testpassword123",
+        "full_name": "Test User",
+        "role": "admin",
+    })
     resp = await client.post("/api/v1/auth/login", json={"email": "test@example.com", "password": "testpassword123"})
     token = resp.json().get("access_token", "")
     return {"Authorization": f"Bearer {token}"}

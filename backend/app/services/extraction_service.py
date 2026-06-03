@@ -116,8 +116,8 @@ class ExtractionService:
         dup_result = await duplicate_detection_service.check_duplicate(invoice, db)
         if dup_result.is_duplicate:
             invoice.is_duplicate = True
-            invoice.duplicate_of = dup_result.duplicate_id
-            invoice.duplicate_score = dup_result.score
+            invoice.duplicate_of = dup_result.duplicate_of
+            invoice.duplicate_score = dup_result.risk_score
 
         doc.extracted_data = extraction.model_dump()
 

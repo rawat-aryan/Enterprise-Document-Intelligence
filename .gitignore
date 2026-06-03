@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+.env
+chroma_db/
+uploads/
+dev.db
+*.sqlite
+.coverage
+coverage.xml
+dist/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
