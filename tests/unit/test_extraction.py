@@ -15,7 +15,6 @@ from backend.app.services.ai_service import (
     _regex_invoice,
 )
 
-
 # ── _parse_json helper ────────────────────────────────────────────────────────
 
 
@@ -142,9 +141,7 @@ async def test_extract_contract_claude_mock():
 async def test_generate_sql_claude_mock():
     svc = AIService()
     mock_backend = MagicMock()
-    mock_backend.generate_sql.return_value = (
-        "SELECT vendor_name, SUM(total_amount) FROM invoices GROUP BY vendor_name"
-    )
+    mock_backend.generate_sql.return_value = "SELECT vendor_name, SUM(total_amount) FROM invoices GROUP BY vendor_name"
     svc._backend = mock_backend
     sql = await svc.generate_sql("Total spend by vendor", "invoices(vendor_name, total_amount)")
     assert "SELECT" in sql.upper()
