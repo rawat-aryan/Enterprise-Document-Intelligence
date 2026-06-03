@@ -32,10 +32,14 @@ class Settings(BaseSettings):
     GOOGLE_PROJECT_ID: str = "my-gcp-project"
     GOOGLE_APPLICATION_CREDENTIALS: str = ""
 
-    # Gemini AI
+    # Gemini AI (optional - used if CLAUDE_API_KEY is not set)
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-1.5-pro"
     GEMINI_EMBEDDING_MODEL: str = "models/embedding-001"
+
+    # Claude API (Anthropic) - takes priority over Gemini when set
+    CLAUDE_API_KEY: str = ""
+    CLAUDE_MODEL: str = "claude-sonnet-4-6"
 
     # GCS
     GCS_BUCKET_NAME: str = "enterprise-documents"
